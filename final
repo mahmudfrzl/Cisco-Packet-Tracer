@@ -1,0 +1,109 @@
+Switch
+
+username cisco secret cisco123
+**Console and Telnet config:
+
+line console 0
+ login local
+line vty 0 15
+ login local
+ transport input telnet
+ transport output telnet
+
+**SSH config:
+
+hostname s1
+ip domain-name google.com
+crypto key generate rsa
+line vty 0 15
+ login local
+ transport input telnet
+ transport output telnet
+
+**VLAN config:
+
+between switch and PC:
+interface FastEthernet0/1
+ switchport mode access
+ switchport access vlan 10
+interface FastEthernet0/2
+ switchport access vlan 20
+ switchport mode access
+
+between switch and switch/router:
+interface FastEthernet0/3
+ switchport mode trunk
+ switchport trunk allowed vlan 10,20
+
+
+****ROUTER*****
+(username password ve hostname verilmis olacaq)
+username root secret root1
+enable secret root2
+
+hostname router1
+
+no ip domain lookup
+!
+line console 0
+logging synchronous
+!
+line vty 0 15
+login local
+transport input all
+
+
+**InterVLAN Routing:
+interface f0/0
+ no shutdown
+interface f0/0.10 (vlan 10)
+ encapsulation dot1q 10
+ ip address 192.168.1.1 255.255.255.0 (gateway)
+ no shutdown
+interface f0/0.20
+ encapsulation dot1q 20 (vlan 20)
+ ip address 192.168.2.1 255.255.255.0
+ no shutdown
+
+**with multilayer Switch:
+ip routing
+interface fa0/1
+switchport mode access
+switchport access vlan 10
+exi
+interface fa0/2
+switchport mode access
+switchport access vlan 20
+exi
+interface fa0/3
+switchport mode access
+switchport access vlan 30
+interface vlan 10
+ip address 192.168.10.1 255.255.255.0
+interface vlan 20
+ip address 192.168.20.1 255.255.255.0
+interface vlan 30
+ip address 192.168.30.1 255.255.255.0
+
+
+**Static routing
+interface GigabitEthernet0/0
+ ip address 10.0.0.2 255.255.255.252
+ no shutdown
+interface GigabitEthernet0/1
+ ip address 20.0.0.1 255.255.255.252
+ no shutdown
+ip route 30.0.0.0 255.255.255.252 10.0.0.1 
+
+
+**DHCP
+ip dhcp excluded-address 10.0.0.1 10.0.0.10
+ip dhcp pool vlan10
+ network 10.0.0.0 255.255.255.0 
+ default-router 10.0.0.1 (gateway)
+ dns-server 8.8.8.8
+ip dhcp excluded-address 20.0.0.1 20.0.0.5
+ip dhcp pool vlan20
+ network 20.0.0.0 255.255.255.0
+ default-router 20.0.0.1 (gateway)
+ dns-server 8.8.8.8
